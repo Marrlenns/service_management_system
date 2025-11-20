@@ -13,7 +13,7 @@ public class CategoryCodeService {
     private final CategoryClickRepository repository;
 
     // Префиксы для категорий 1..5
-    private final String[] prefixes = {"A", "Б", "В", "Г", "Д"};
+    private final String[] prefixes = {"A", "B", "C", "D", "E"};
 
     public CategoryCodeService(CategoryClickRepository repository) {
         this.repository = repository;

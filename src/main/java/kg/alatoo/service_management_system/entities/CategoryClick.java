@@ -11,11 +11,32 @@ public class CategoryClick {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "student_id", nullable = false)
-    private Long studentId;
+    /**
+     * Общий идентификатор пользователя:
+     * - для студента: id студента
+     * - для преподавателя: id преподавателя
+     */
+    @Column(name = "user_id")
+    private Long userId;
 
+    /**
+     * Роль пользователя: "STUDENT" или "TEACHER"
+     */
+    @Column(name = "role")
+    private String role;
+
+    /**
+     * Номер категории (1..5)
+     */
     @Column(name = "category_index", nullable = false)
-    private Integer categoryIndex; // 1..5
+    private Integer categoryIndex;
+
+    /**
+     * Сохранённый код, который показывали на талоне:
+     * "A1", "Б2", "В10" и т.п.
+     */
+    @Column(name = "code")
+    private String code;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -23,9 +44,15 @@ public class CategoryClick {
     public CategoryClick() {
     }
 
-    public CategoryClick(Long studentId, Integer categoryIndex, LocalDateTime createdAt) {
-        this.studentId = studentId;
+    public CategoryClick(Long userId,
+                         String role,
+                         Integer categoryIndex,
+                         String code,
+                         LocalDateTime createdAt) {
+        this.userId = userId;
+        this.role = role;
         this.categoryIndex = categoryIndex;
+        this.code = code;
         this.createdAt = createdAt;
     }
 
@@ -33,12 +60,20 @@ public class CategoryClick {
         return id;
     }
 
-    public Long getStudentId() {
-        return studentId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Integer getCategoryIndex() {
@@ -47,6 +82,14 @@ public class CategoryClick {
 
     public void setCategoryIndex(Integer categoryIndex) {
         this.categoryIndex = categoryIndex;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public LocalDateTime getCreatedAt() {

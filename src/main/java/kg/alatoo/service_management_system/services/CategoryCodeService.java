@@ -12,16 +12,22 @@ public class CategoryCodeService {
 
     private final CategoryClickRepository repository;
 
-    private final String[] prefixes = {"A", "B", "C", "D", "E"};
+    // Префиксы для категорий 1..5
+    private final String[] prefixes = {"A", "Б", "В", "Г", "Д"};
 
     public CategoryCodeService(CategoryClickRepository repository) {
         this.repository = repository;
     }
 
-    public String registerClickAndGetCode(Long studentId, int categoryIndex) {
-        if (studentId == null) {
-            throw new IllegalArgumentException("studentId is null");
-        }
+    /**
+     * Регистрирует клик пользователя по категории и возвращает код,
+     * например "A1", "A2", "Б1", "Б2" и т.п.
+     *
+     * @param userId        id студента или преподавателя
+     * @param role          "STUDENT" или "TEACHER"
+     * @param categoryIndex номер категории (1..5)
+     */
+    public String registerClickAndGetCode(Long userId, String role, int categoryIndex) {
         if (categoryIndex < 1 || categoryIndex > prefixes.length) {
             throw new IllegalArgumentException("Unknown category index: " + categoryIndex);
         }
@@ -40,9 +46,12 @@ public class CategoryCodeService {
         String code = prefixes[categoryIndex - 1] + nextNumber;
 
         CategoryClick click = new CategoryClick();
-        click.setStudentId(studentId);
+        click.setUserId(userId);
+        click.setRole(role);
         click.setCategoryIndex(categoryIndex);
+        click.setCode(code);
         click.setCreatedAt(LocalDateTime.now());
+
         repository.save(click);
 
         return code;

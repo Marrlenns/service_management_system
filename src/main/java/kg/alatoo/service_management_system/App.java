@@ -9,8 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import kg.alatoo.service_management_system.entities.Teacher;
 import kg.alatoo.service_management_system.keyboards.NumberKeyboard;
+import kg.alatoo.service_management_system.keyboards.TextKeyboard;
 import kg.alatoo.service_management_system.services.StudentService;
+import kg.alatoo.service_management_system.services.TeacherService;
 import kg.alatoo.service_management_system.services.CategoryCodeService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -23,8 +26,13 @@ public class App extends Application {
 
     private ConfigurableApplicationContext context;
 
-    private Long currentStudentId;
-    private String currentStudentName;
+    // Текущий пользователь (студент или преподаватель)
+    private Long   currentUserId;    // id студента или преподавателя
+    private String currentUserName;  // "Имя Фамилия"
+    /**
+     * Для БД: "STUDENT" или "TEACHER"
+     */
+    private String currentUserRole;
 
     @Override
     public void init() {
@@ -35,11 +43,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-
-        StudentService studentService = context.getBean(StudentService.class);
+        // ----- Бины -----
+        StudentService      studentService      = context.getBean(StudentService.class);
+        TeacherService      teacherService      = context.getBean(TeacherService.class);
         CategoryCodeService categoryCodeService = context.getBean(CategoryCodeService.class);
 
-
+        // ----- Общие стили -----
         final String DARK_BG = "-fx-background-color: #0B1E39;";
         final String btnStyle = String.join("",
                 "-fx-background-color: #1976D2;",
@@ -56,7 +65,7 @@ public class App extends Application {
         );
         final double btnWidth = 200, btnHeight = 50;
 
-
+        // ===== Главное меню =====
         Button btnStudent = new Button("Student");
         Button btnTeacher = new Button("Teacher");
         Button btnOther   = new Button("Other");
@@ -77,40 +86,73 @@ public class App extends Application {
         stage.setScene(scene);
         stage.show();
 
+        // ===== Экран STUDENT ID + цифровая клавиатура =====
+        Label studentTitle = new Label("Student ID");
+        studentTitle.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
 
-        Label title = new Label("Student ID");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
+        TextField studentIdField = new TextField();
+        studentIdField.setPromptText("Введите ваш ID");
+        studentIdField.setEditable(false); // ввод только через NumberKeyboard
+        studentIdField.setPrefColumnCount(12);
+        studentIdField.setMaxWidth(260);
+        studentIdField.setStyle("-fx-font-size: 14px;");
 
-        TextField idField = new TextField();
-        idField.setPromptText("Введите ваш ID");
-        idField.setEditable(false); // ввод только через экранную клавиатуру
-        idField.setPrefColumnCount(12);
-        idField.setMaxWidth(260);
-        idField.setStyle("-fx-font-size: 14px;");
+        NumberKeyboard studentKeypad = NumberKeyboard.forTextField(studentIdField, 12);
+        studentKeypad.setKeyWidth(64);
 
-        NumberKeyboard keypad = NumberKeyboard.forTextField(idField, 12);
-        keypad.setKeyWidth(64);
+        Button studentEnter = new Button("Enter");
+        studentEnter.setStyle(btnStyle);
+        studentEnter.setPrefSize(btnWidth, btnHeight);
 
-        Button enter = new Button("Enter");
-        enter.setStyle(btnStyle);
-        enter.setPrefSize(btnWidth, btnHeight);
+        Button backToMenuFromStudent = new Button("Back");
+        backToMenuFromStudent.setStyle(backBtnStyle);
+        backToMenuFromStudent.setPrefSize(btnWidth, 40);
 
-        Button backToMenu = new Button("Back");
-        backToMenu.setStyle(backBtnStyle);
-        backToMenu.setPrefSize(btnWidth, 40);
-
-        VBox studentCenter = new VBox(18, title, idField, keypad, enter);
+        VBox studentCenter = new VBox(18, studentTitle, studentIdField, studentKeypad, studentEnter);
         studentCenter.setAlignment(Pos.CENTER);
 
         BorderPane studentRoot = new BorderPane();
         studentRoot.setCenter(studentCenter);
-        StackPane studentBottom = new StackPane(backToMenu);
+        StackPane studentBottom = new StackPane(backToMenuFromStudent);
         studentBottom.setPadding(new Insets(20));
         studentBottom.setAlignment(Pos.CENTER);
         studentRoot.setBottom(studentBottom);
         studentRoot.setStyle(DARK_BG);
 
+        // ===== Экран TEACHER email + текстовая клавиатура =====
+        Label teacherTitle = new Label("Teacher email");
+        teacherTitle.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
 
+        TextField teacherEmailField = new TextField();
+        teacherEmailField.setPromptText("Введите ваш email");
+        teacherEmailField.setEditable(false); // ввод через TextKeyboard
+        teacherEmailField.setPrefColumnCount(20);
+        teacherEmailField.setMaxWidth(320);
+        teacherEmailField.setStyle("-fx-font-size: 14px;");
+
+        TextKeyboard teacherKeyboard = TextKeyboard.forTextField(teacherEmailField, 40);
+        teacherKeyboard.setKeyWidth(48);
+
+        Button teacherEnter = new Button("Enter");
+        teacherEnter.setStyle(btnStyle);
+        teacherEnter.setPrefSize(btnWidth, btnHeight);
+
+        Button backToMenuFromTeacher = new Button("Back");
+        backToMenuFromTeacher.setStyle(backBtnStyle);
+        backToMenuFromTeacher.setPrefSize(btnWidth, 40);
+
+        VBox teacherCenter = new VBox(18, teacherTitle, teacherEmailField, teacherKeyboard, teacherEnter);
+        teacherCenter.setAlignment(Pos.CENTER);
+
+        BorderPane teacherRoot = new BorderPane();
+        teacherRoot.setCenter(teacherCenter);
+        StackPane teacherBottom = new StackPane(backToMenuFromTeacher);
+        teacherBottom.setPadding(new Insets(20));
+        teacherBottom.setAlignment(Pos.CENTER);
+        teacherRoot.setBottom(teacherBottom);
+        teacherRoot.setStyle(DARK_BG);
+
+        // ===== Экран приветствия + категории (общий) =====
         Label welcome = new Label();
         welcome.setStyle("-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;");
 
@@ -147,12 +189,12 @@ public class App extends Application {
         welcomeRoot.setBottom(welcomeBottom);
         welcomeRoot.setStyle(DARK_BG);
 
-
+        // ===== Экран талончика =====
         Label ticketTitle = new Label("Ваш номер");
         ticketTitle.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
 
-        Label ticketStudentLabel = new Label();
-        ticketStudentLabel.setStyle("-fx-text-fill: #CFD8DC; -fx-font-size: 16px;");
+        Label ticketUserLabel = new Label();
+        ticketUserLabel.setStyle("-fx-text-fill: #CFD8DC; -fx-font-size: 16px;");
 
         Label ticketCodeLabel = new Label();
         ticketCodeLabel.setStyle(
@@ -164,7 +206,7 @@ public class App extends Application {
         Label ticketHint = new Label("Пожалуйста, ожидайте своей очереди");
         ticketHint.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
 
-        VBox ticketCard = new VBox(10, ticketTitle, ticketStudentLabel, ticketCodeLabel, ticketHint);
+        VBox ticketCard = new VBox(10, ticketTitle, ticketUserLabel, ticketCodeLabel, ticketHint);
         ticketCard.setAlignment(Pos.CENTER);
         ticketCard.setPadding(new Insets(24));
         ticketCard.setMaxWidth(400);
@@ -193,13 +235,13 @@ public class App extends Application {
         ticketRoot.setBottom(ticketBottom);
         ticketRoot.setStyle(DARK_BG);
 
-
+        // ----- Обработчики категорий -----
         for (int i = 0; i < 5; i++) {
-            final int catIndex = i + 1;
+            final int catIndex = i + 1; // 1..5
 
             cat[i].setOnAction(ev -> {
-                if (currentStudentId == null) {
-                    new Alert(Alert.AlertType.WARNING, "Сначала введите Student ID").showAndWait();
+                if (currentUserName == null || currentUserRole == null) {
+                    new Alert(Alert.AlertType.WARNING, "Сначала выполните вход").showAndWait();
                     return;
                 }
 
@@ -209,7 +251,11 @@ public class App extends Application {
                 Task<String> task = new Task<>() {
                     @Override
                     protected String call() {
-                        return categoryCodeService.registerClickAndGetCode(currentStudentId, catIndex);
+                        return categoryCodeService.registerClickAndGetCode(
+                                currentUserId,
+                                currentUserRole,  // "STUDENT" или "TEACHER"
+                                catIndex
+                        );
                     }
                 };
 
@@ -217,13 +263,18 @@ public class App extends Application {
                     sourceButton.setDisable(false);
                     String code = task.getValue();
 
-                    // заполняем данные талончика
                     ticketCodeLabel.setText(code);
-                    if (currentStudentName != null) {
-                        ticketStudentLabel.setText("Студент: " + currentStudentName);
+
+                    String displayRole;
+                    if ("TEACHER".equals(currentUserRole)) {
+                        displayRole = "Преподаватель";
+                    } else if ("STUDENT".equals(currentUserRole)) {
+                        displayRole = "Студент";
                     } else {
-                        ticketStudentLabel.setText("");
+                        displayRole = currentUserRole;
                     }
+
+                    ticketUserLabel.setText(displayRole + ": " + currentUserName);
 
                     scene.setRoot(ticketRoot);
                 });
@@ -239,39 +290,48 @@ public class App extends Application {
             });
         }
 
-
+        // ----- Навигация -----
         btnStudent.setOnAction(e -> {
-            idField.clear();
-            currentStudentId = null;
-            currentStudentName = null;
+            clearCurrentUser();
+            studentIdField.clear();
             scene.setRoot(studentRoot);
         });
 
-        backToMenu.setOnAction(e -> {
-            currentStudentId = null;
-            currentStudentName = null;
-            idField.clear();
+        btnTeacher.setOnAction(e -> {
+            clearCurrentUser();
+            teacherEmailField.clear();
+            scene.setRoot(teacherRoot);
+        });
+
+        backToMenuFromStudent.setOnAction(e -> {
+            clearCurrentUser();
+            studentIdField.clear();
+            scene.setRoot(mainRoot);
+        });
+
+        backToMenuFromTeacher.setOnAction(e -> {
+            clearCurrentUser();
+            teacherEmailField.clear();
             scene.setRoot(mainRoot);
         });
 
         backFromWelcome.setOnAction(e -> {
-            currentStudentId = null;
-            currentStudentName = null;
-            idField.clear();
+            clearCurrentUser();
+            studentIdField.clear();
+            teacherEmailField.clear();
             scene.setRoot(mainRoot);
         });
 
         ticketDone.setOnAction(e -> {
-
-            currentStudentId = null;
-            currentStudentName = null;
-            idField.clear();
+            clearCurrentUser();
+            studentIdField.clear();
+            teacherEmailField.clear();
             scene.setRoot(mainRoot);
         });
 
-
-        enter.setOnAction(e -> {
-            String raw = idField.getText().trim();
+        // ----- Логин STUDENT по ID -----
+        studentEnter.setOnAction(e -> {
+            String raw = studentIdField.getText().trim();
             if (raw.isEmpty()) {
                 new Alert(Alert.AlertType.WARNING, "Введите ID").showAndWait();
                 return;
@@ -287,24 +347,27 @@ public class App extends Application {
             Task<Optional<String>> task = new Task<>() {
                 @Override
                 protected Optional<String> call() {
-                    return studentService.getNameById(id); // ожидается Optional<String> name
+                    return studentService.getNameById(id);
                 }
             };
 
-            enter.setDisable(true);
+            studentEnter.setDisable(true);
 
             task.setOnSucceeded(ev -> {
-                enter.setDisable(false);
+                studentEnter.setDisable(false);
                 task.getValue().ifPresentOrElse(name -> {
-                    currentStudentId = id;
-                    currentStudentName = name;
+                    currentUserId   = id;
+                    currentUserName = name;
+                    currentUserRole = "STUDENT";
+
                     welcome.setText("Welcome " + name);
                     scene.setRoot(welcomeRoot);
-                }, () -> new Alert(Alert.AlertType.INFORMATION, "Студент с таким ID не найден").showAndWait());
+                }, () -> new Alert(Alert.AlertType.INFORMATION,
+                        "Студент с таким ID не найден").showAndWait());
             });
 
             task.setOnFailed(ev -> {
-                enter.setDisable(false);
+                studentEnter.setDisable(false);
                 Throwable ex = task.getException();
                 new Alert(Alert.AlertType.ERROR, "Ошибка доступа к БД:\n" +
                         (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown")).showAndWait();
@@ -312,6 +375,52 @@ public class App extends Application {
 
             new Thread(task, "db-student-lookup").start();
         });
+
+        // ----- Логин TEACHER по email -----
+        teacherEnter.setOnAction(e -> {
+            String email = teacherEmailField.getText().trim();
+            if (email.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Введите email").showAndWait();
+                return;
+            }
+
+            Task<Optional<Teacher>> task = new Task<>() {
+                @Override
+                protected Optional<Teacher> call() {
+                    return teacherService.findByEmail(email);
+                }
+            };
+
+            teacherEnter.setDisable(true);
+
+            task.setOnSucceeded(ev -> {
+                teacherEnter.setDisable(false);
+                task.getValue().ifPresentOrElse(teacher -> {
+                    currentUserId   = teacher.getId();
+                    currentUserName = teacher.getFirstname() + " " + teacher.getLastname();
+                    currentUserRole = "TEACHER";
+
+                    welcome.setText("Welcome " + currentUserName);
+                    scene.setRoot(welcomeRoot);
+                }, () -> new Alert(Alert.AlertType.INFORMATION,
+                        "Преподаватель с таким email не найден").showAndWait());
+            });
+
+            task.setOnFailed(ev -> {
+                teacherEnter.setDisable(false);
+                Throwable ex = task.getException();
+                new Alert(Alert.AlertType.ERROR, "Ошибка доступа к БД:\n" +
+                        (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown")).showAndWait();
+            });
+
+            new Thread(task, "db-teacher-lookup").start();
+        });
+    }
+
+    private void clearCurrentUser() {
+        currentUserId   = null;
+        currentUserName = null;
+        currentUserRole = null;
     }
 
     @Override

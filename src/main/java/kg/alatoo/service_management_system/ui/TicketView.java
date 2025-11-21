@@ -27,7 +27,7 @@ public class TicketView {
                       Consumer<Language> onLanguageChange) {
 
         titleLabel = new Label();
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;");
 
         userLabel = new Label();
         userLabel.setStyle("-fx-text-fill: #CFD8DC; -fx-font-size: 16px;");
@@ -35,32 +35,27 @@ public class TicketView {
         codeLabel = new Label();
         codeLabel.setStyle(
                 "-fx-text-fill: #FFEB3B;" +
-                        "-fx-font-size: 72px;" +
+                        "-fx-font-size: 80px;" +
                         "-fx-font-weight: bold;"
         );
 
         hintLabel = new Label();
         hintLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
 
-        VBox card = new VBox(10, titleLabel, userLabel, codeLabel, hintLabel);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(24));
-        card.setMaxWidth(400);
-        card.setStyle(
-                "-fx-background-color: #102542;" +
-                        "-fx-background-radius: 16px;" +
-                        "-fx-border-color: #546E7A;" +
-                        "-fx-border-radius: 16px;" +
-                        "-fx-border-width: 2px;"
-        );
+        VBox cardContent = new VBox(10, titleLabel, userLabel, codeLabel, hintLabel);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setPadding(new Insets(24));
+
+        StackPane card = new StackPane(cardContent);
+        card.setStyle(UiStyles.CARD);
+        card.setMaxWidth(420);
 
         StackPane center = new StackPane(card);
-        center.setPadding(new Insets(24));
+        center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 
         doneButton = new Button();
         doneButton.setStyle(UiStyles.SECONDARY_BUTTON);
-        doneButton.setPrefSize(200, 40);
 
         StackPane bottom = new StackPane(doneButton);
         bottom.setPadding(new Insets(20));

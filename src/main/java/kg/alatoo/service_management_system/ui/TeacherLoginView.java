@@ -30,16 +30,16 @@ public class TeacherLoginView {
                             Consumer<Language> onLanguageChange) {
 
         titleLabel = new Label();
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;");
 
         emailField = new TextField();
         emailField.setEditable(false);
         emailField.setPrefColumnCount(20);
         emailField.setMaxWidth(320);
-        emailField.setStyle("-fx-font-size: 14px;");
+        emailField.setStyle("-fx-font-size: 16px;");
 
         TextKeyboard keyboard = TextKeyboard.forTextField(emailField, 40);
-        keyboard.setKeyWidth(48);
+        keyboard.setKeyWidth(52);
         keyboard.setMaxWidth(Region.USE_PREF_SIZE);
 
         HBox keyboardBox = new HBox(keyboard);
@@ -47,13 +47,20 @@ public class TeacherLoginView {
 
         enterButton = new Button();
         enterButton.setStyle(UiStyles.PRIMARY_BUTTON);
-        enterButton.setPrefSize(200, 50);
 
         backButton = new Button();
         backButton.setStyle(UiStyles.SECONDARY_BUTTON);
-        backButton.setPrefSize(200, 40);
 
-        VBox center = new VBox(18, titleLabel, emailField, keyboardBox, enterButton);
+        VBox content = new VBox(18, titleLabel, emailField, keyboardBox, enterButton);
+        content.setAlignment(Pos.CENTER);
+
+        StackPane card = new StackPane(content);
+        card.setStyle(UiStyles.CARD);
+        card.setPadding(new Insets(32));
+        card.setMaxWidth(560);
+
+        StackPane center = new StackPane(card);
+        center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 
         root = new BorderPane();

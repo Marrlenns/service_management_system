@@ -4,8 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import kg.alatoo.service_management_system.i18n.I18n;
 import kg.alatoo.service_management_system.i18n.Language;
 
@@ -30,17 +29,27 @@ public class MainMenuView {
 
         for (Button b : new Button[]{studentButton, teacherButton, otherButton}) {
             b.setStyle(UiStyles.PRIMARY_BUTTON);
-            // начальные значения, дальше будут переопределены биндингами
             b.setPrefSize(200, 50);
         }
 
-        VBox menu = new VBox(15, studentButton, teacherButton, otherButton);
+        VBox menu = new VBox(18, studentButton, teacherButton, otherButton);
         menu.setAlignment(Pos.CENTER);
-        menu.setPadding(new Insets(24));
+
+        VBox cardContent = new VBox(24, menu);
+        cardContent.setAlignment(Pos.CENTER);
+        cardContent.setPadding(new Insets(24));
+
+        StackPane card = new StackPane(cardContent);
+        card.setStyle(UiStyles.CARD);
+        card.setMaxWidth(500);
+
+        StackPane center = new StackPane(card);
+        center.setPadding(new Insets(32));
+        center.setAlignment(Pos.CENTER);
 
         root = new BorderPane();
-        root.setCenter(menu);
         root.setTop(HeaderBar.create(onLanguageChange));
+        root.setCenter(center);
         root.setStyle(UiStyles.DARK_BG);
 
         // Привязываем размеры кнопок к размеру окна

@@ -30,16 +30,16 @@ public class StudentLoginView {
                             Consumer<Language> onLanguageChange) {
 
         titleLabel = new Label();
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;");
 
         idField = new TextField();
         idField.setEditable(false);
         idField.setPrefColumnCount(12);
         idField.setMaxWidth(260);
-        idField.setStyle("-fx-font-size: 14px;");
+        idField.setStyle("-fx-font-size: 16px;");
 
         NumberKeyboard keypad = NumberKeyboard.forTextField(idField, 12);
-        keypad.setKeyWidth(64);
+        keypad.setKeyWidth(72);
         keypad.setMaxWidth(Region.USE_PREF_SIZE);
 
         HBox keypadBox = new HBox(keypad);
@@ -47,13 +47,20 @@ public class StudentLoginView {
 
         enterButton = new Button();
         enterButton.setStyle(UiStyles.PRIMARY_BUTTON);
-        enterButton.setPrefSize(200, 50);
 
         backButton = new Button();
         backButton.setStyle(UiStyles.SECONDARY_BUTTON);
-        backButton.setPrefSize(200, 40);
 
-        VBox center = new VBox(18, titleLabel, idField, keypadBox, enterButton);
+        VBox content = new VBox(18, titleLabel, idField, keypadBox, enterButton);
+        content.setAlignment(Pos.CENTER);
+
+        StackPane card = new StackPane(content);
+        card.setStyle(UiStyles.CARD);
+        card.setPadding(new Insets(32));
+        card.setMaxWidth(520);
+
+        StackPane center = new StackPane(card);
+        center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 
         root = new BorderPane();
@@ -66,7 +73,7 @@ public class StudentLoginView {
         root.setBottom(bottom);
         root.setStyle(UiStyles.DARK_BG);
 
-        // биндим размеры кнопок к размеру окна
+        // биндим размеры кнопок
         enterButton.prefWidthProperty().bind(root.widthProperty().multiply(ENTER_WIDTH_RATIO));
         enterButton.prefHeightProperty().bind(root.heightProperty().multiply(ENTER_HEIGHT_RATIO));
 

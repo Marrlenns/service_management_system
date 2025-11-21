@@ -27,7 +27,7 @@ public class WelcomeView {
                        Consumer<Language> onLanguageChange) {
 
         welcomeLabel = new Label();
-        welcomeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;");
+        welcomeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;");
 
         categoryButtons = new Button[5];
         for (int i = 0; i < 5; i++) {
@@ -37,7 +37,7 @@ public class WelcomeView {
             categoryButtons[i] = b;
         }
 
-        VBox categoriesCol = new VBox(12,
+        VBox categoriesCol = new VBox(14,
                 categoryButtons[0],
                 categoryButtons[1],
                 categoryButtons[2],
@@ -47,9 +47,17 @@ public class WelcomeView {
 
         backButton = new Button();
         backButton.setStyle(UiStyles.SECONDARY_BUTTON);
-        backButton.setPrefSize(200, 40);
 
-        VBox center = new VBox(24, welcomeLabel, categoriesCol);
+        VBox content = new VBox(24, welcomeLabel, categoriesCol);
+        content.setAlignment(Pos.CENTER);
+
+        StackPane card = new StackPane(content);
+        card.setStyle(UiStyles.CARD);
+        card.setPadding(new Insets(32));
+        card.setMaxWidth(560);
+
+        StackPane center = new StackPane(card);
+        center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 
         root = new BorderPane();
@@ -62,7 +70,7 @@ public class WelcomeView {
         root.setBottom(bottom);
         root.setStyle(UiStyles.DARK_BG);
 
-        // биндим размеры категорий и back-кнопки
+        // биндим размеры кнопок
         for (Button b : categoryButtons) {
             b.prefWidthProperty().bind(root.widthProperty().multiply(CAT_WIDTH_RATIO));
             b.prefHeightProperty().bind(root.heightProperty().multiply(CAT_HEIGHT_RATIO));

@@ -23,23 +23,21 @@ public final class HeaderBar {
         // ----- ЛОГОТИП (слева) -----
         HBox logoBox = new HBox();
         logoBox.setAlignment(Pos.CENTER_LEFT);
-        logoBox.setPadding(new Insets(10, 16, 0, 16)); // top, right, bottom, left
+        logoBox.setPadding(new Insets(10, 16, 0, 16)); // top,right,bottom,left
 
         try {
-            // Путь к логотипу в resources: /logo.png
+            // путь: src/main/resources/logo.png
             InputStream is = HeaderBar.class.getResourceAsStream("/logo.png");
             if (is != null) {
                 Image img = new Image(is);
                 ImageView logoView = new ImageView(img);
-                logoView.setFitHeight(80);       // высота логотипа
-                logoView.setPreserveRatio(true); // пропорции
+                logoView.setFitHeight(72);          // ← тут регулируешь размер логотипа
+                logoView.setPreserveRatio(true);
                 logoBox.getChildren().add(logoView);
             } else {
-                // если файл не найден — просто логируем в консоль, но не падаем
                 System.err.println("[HeaderBar] logo.png not found on classpath (/logo.png)");
             }
         } catch (Exception ex) {
-            // тоже не даём приложению упасть
             System.err.println("[HeaderBar] Failed to load logo: " + ex.getMessage());
         }
 
@@ -50,7 +48,7 @@ public final class HeaderBar {
         BorderPane header = new BorderPane();
         header.setLeft(logoBox);
         header.setRight(langBar);
-        header.setStyle(UiStyles.DARK_BG);
+        header.setStyle(UiStyles.HEADER_BG);
 
         return header;
     }

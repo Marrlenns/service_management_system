@@ -19,14 +19,6 @@ public class CategoryCodeService {
         this.repository = repository;
     }
 
-    /**
-     * Регистрирует клик пользователя по категории и возвращает код,
-     * например "A1", "A2", "Б1", "Б2" и т.п.
-     *
-     * @param userId        id студента или преподавателя
-     * @param role          "STUDENT" или "TEACHER"
-     * @param categoryIndex номер категории (1..5)
-     */
     public String registerClickAndGetCode(Long userId, String role, int categoryIndex) {
         if (categoryIndex < 1 || categoryIndex > prefixes.length) {
             throw new IllegalArgumentException("Unknown category index: " + categoryIndex);

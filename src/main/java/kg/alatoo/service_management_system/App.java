@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import kg.alatoo.service_management_system.entities.Teacher;
+import kg.alatoo.service_management_system.i18n.I18n;
+import kg.alatoo.service_management_system.i18n.Language;
 import kg.alatoo.service_management_system.services.CategoryCodeService;
 import kg.alatoo.service_management_system.services.StudentService;
 import kg.alatoo.service_management_system.services.TeacherService;
@@ -15,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -27,6 +30,16 @@ public class App extends Application {
     private String currentUserName;
     // "STUDENT" / "TEACHER" / "OTHER"
     private String currentUserRole;
+
+    // текущий язык
+    private Language currentLanguage = Language.RU;
+
+    // Вьюшки
+    private MainMenuView     mainMenuView;
+    private StudentLoginView studentLoginView;
+    private TeacherLoginView teacherLoginView;
+    private WelcomeView      welcomeView;
+    private TicketView       ticketView;
 
     @Override
     public void init() {
@@ -42,16 +55,28 @@ public class App extends Application {
         TeacherService      teacherService      = context.getBean(TeacherService.class);
         CategoryCodeService categoryCodeService = context.getBean(CategoryCodeService.class);
 
-        // ---- Вьюшки ----
-        MainMenuView      mainMenuView      = new MainMenuView();
-        StudentLoginView  studentLoginView  = new StudentLoginView();
-        TeacherLoginView  teacherLoginView  = new TeacherLoginView();
-        WelcomeView       welcomeView       = new WelcomeView();
-        TicketView        ticketView        = new TicketView();
+        // ---- Вьюшки (с языком и колбэком смены языка) ----
+        mainMenuView     = new MainMenuView(currentLanguage, this::onLanguageChange);
+        studentLoginView = new StudentLoginView(currentLanguage, this::onLanguageChange);
+        teacherLoginView = new TeacherLoginView(currentLanguage, this::onLanguageChange);
+        welcomeView      = new WelcomeView(currentLanguage, this::onLanguageChange);
+        ticketView       = new TicketView(currentLanguage, this::onLanguageChange);
 
-        Scene scene = new Scene(mainMenuView.getRoot(), 800, 600);
-        stage.setTitle("Service Management Kiosk");
+        try {
+            var is = getClass().getResourceAsStream("/logo.png");
+            if (is != null) {
+                stage.getIcons().add(new javafx.scene.image.Image(is));
+            } else {
+                System.err.println("[App] logo.png not found for stage icon");
+            }
+        } catch (Exception e) {
+            System.err.println("[App] Failed to set stage icon: " + e.getMessage());
+        }
+
+        Scene scene = new Scene(mainMenuView.getRoot());
+        stage.setTitle("Service Management System");
         stage.setScene(scene);
+        stage.setFullScreen(true);
         stage.show();
 
         // ===== Навигация из главного меню =====
@@ -71,8 +96,8 @@ public class App extends Application {
             clearCurrentUser();
             currentUserId   = null;
             currentUserRole = "OTHER";
-            currentUserName = ""; // имя не нужно
-            welcomeView.getWelcomeLabel().setText("Welcome");
+            currentUserName = "";
+            updateWelcomeLabel();
             scene.setRoot(welcomeView.getRoot());
         });
 
@@ -103,18 +128,18 @@ public class App extends Application {
             scene.setRoot(mainMenuView.getRoot());
         });
 
-        // ===== Логин студента =====
+        // ===== Логин STUDENT =====
         studentLoginView.getEnterButton().setOnAction(e -> {
             String raw = studentLoginView.getIdField().getText().trim();
             if (raw.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Введите ID");
+                showAlert(Alert.AlertType.WARNING, I18n.alertEnterId(currentLanguage));
                 return;
             }
             Long id;
             try {
                 id = Long.parseLong(raw);
             } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "ID должен быть числом");
+                showAlert(Alert.AlertType.ERROR, I18n.alertIdMustBeNumber(currentLanguage));
                 return;
             }
 
@@ -133,28 +158,28 @@ public class App extends Application {
                     currentUserId   = id;
                     currentUserName = name;
                     currentUserRole = "STUDENT";
-                    welcomeView.getWelcomeLabel().setText("Welcome " + name);
+                    updateWelcomeLabel();
                     scene.setRoot(welcomeView.getRoot());
                 }, () -> showAlert(Alert.AlertType.INFORMATION,
-                        "Студент с таким ID не найден"));
+                        I18n.alertStudentNotFound(currentLanguage)));
             });
 
             task.setOnFailed(ev -> {
                 studentLoginView.getEnterButton().setDisable(false);
                 Throwable ex = task.getException();
                 showAlert(Alert.AlertType.ERROR,
-                        "Ошибка доступа к БД:\n" +
+                        I18n.alertDbErrorPrefix(currentLanguage) +
                                 (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown"));
             });
 
             new Thread(task, "db-student-lookup").start();
         });
 
-        // ===== Логин преподавателя по email =====
+        // ===== Логин TEACHER по email =====
         teacherLoginView.getEnterButton().setOnAction(e -> {
             String email = teacherLoginView.getEmailField().getText().trim();
             if (email.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Введите email");
+                showAlert(Alert.AlertType.WARNING, I18n.alertEnterEmail(currentLanguage));
                 return;
             }
 
@@ -173,18 +198,17 @@ public class App extends Application {
                     currentUserId   = teacher.getId();
                     currentUserName = teacher.getFirstname() + " " + teacher.getLastname();
                     currentUserRole = "TEACHER";
-
-                    welcomeView.getWelcomeLabel().setText("Welcome " + currentUserName);
+                    updateWelcomeLabel();
                     scene.setRoot(welcomeView.getRoot());
                 }, () -> showAlert(Alert.AlertType.INFORMATION,
-                        "Преподаватель с таким email не найден"));
+                        I18n.alertTeacherNotFound(currentLanguage)));
             });
 
             task.setOnFailed(ev -> {
                 teacherLoginView.getEnterButton().setDisable(false);
                 Throwable ex = task.getException();
                 showAlert(Alert.AlertType.ERROR,
-                        "Ошибка доступа к БД:\n" +
+                        I18n.alertDbErrorPrefix(currentLanguage) +
                                 (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown"));
             });
 
@@ -197,7 +221,8 @@ public class App extends Application {
             final int catIndex = i + 1;
             categoryButtons[i].setOnAction(e -> {
                 if (currentUserRole == null) {
-                    showAlert(Alert.AlertType.WARNING, "Сначала выполните вход или выберите Other");
+                    showAlert(Alert.AlertType.WARNING,
+                            I18n.alertLoginOrOtherFirst(currentLanguage));
                     return;
                 }
 
@@ -220,11 +245,14 @@ public class App extends Application {
                     String code = task.getValue();
 
                     String displayRole;
-                    switch (currentUserRole) {
-                        case "TEACHER" -> displayRole = "Преподаватель";
-                        case "STUDENT" -> displayRole = "Студент";
-                        case "OTHER"   -> displayRole = "Гость";
-                        default        -> displayRole = currentUserRole;
+                    if ("TEACHER".equals(currentUserRole)) {
+                        displayRole = I18n.roleTeacher(currentLanguage);
+                    } else if ("STUDENT".equals(currentUserRole)) {
+                        displayRole = I18n.roleStudent(currentLanguage);
+                    } else if ("OTHER".equals(currentUserRole)) {
+                        displayRole = I18n.roleOther(currentLanguage);
+                    } else {
+                        displayRole = currentUserRole;
                     }
 
                     ticketView.showTicket(displayRole, currentUserName, code);
@@ -235,7 +263,7 @@ public class App extends Application {
                     sourceButton.setDisable(false);
                     Throwable ex = task.getException();
                     showAlert(Alert.AlertType.ERROR,
-                            "Ошибка при выдаче кода категории:\n" +
+                            I18n.alertCategoryErrorPrefix(currentLanguage) +
                                     (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown"));
                 });
 
@@ -248,6 +276,32 @@ public class App extends Application {
         currentUserId   = null;
         currentUserName = null;
         currentUserRole = null;
+        updateWelcomeLabel();
+    }
+
+    private void updateWelcomeLabel() {
+        if (welcomeView == null) return;
+        if (currentUserName != null && !currentUserName.isBlank()) {
+            welcomeView.getWelcomeLabel()
+                    .setText(I18n.welcomeWithName(currentLanguage, currentUserName));
+        } else {
+            welcomeView.getWelcomeLabel()
+                    .setText(I18n.welcomePlain(currentLanguage));
+        }
+    }
+
+    private void onLanguageChange(Language lang) {
+        if (lang == null || lang == currentLanguage) return;
+
+        currentLanguage = lang;
+
+        mainMenuView.applyLanguage(lang);
+        studentLoginView.applyLanguage(lang);
+        teacherLoginView.applyLanguage(lang);
+        welcomeView.applyLanguage(lang);
+        ticketView.applyLanguage(lang);
+
+        updateWelcomeLabel();
     }
 
     private void showAlert(Alert.AlertType type, String text) {

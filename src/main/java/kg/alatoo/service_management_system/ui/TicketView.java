@@ -6,17 +6,28 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import kg.alatoo.service_management_system.i18n.I18n;
+import kg.alatoo.service_management_system.i18n.Language;
+
+import java.util.function.Consumer;
 
 public class TicketView {
 
     private final BorderPane root;
+    private final Label titleLabel;
     private final Label userLabel;
     private final Label codeLabel;
+    private final Label hintLabel;
     private final Button doneButton;
 
-    public TicketView() {
-        Label title = new Label("Ваш номер");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
+    private static final double DONE_WIDTH_RATIO  = 0.2;
+    private static final double DONE_HEIGHT_RATIO = 0.06;
+
+    public TicketView(Language initialLanguage,
+                      Consumer<Language> onLanguageChange) {
+
+        titleLabel = new Label();
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
 
         userLabel = new Label();
         userLabel.setStyle("-fx-text-fill: #CFD8DC; -fx-font-size: 16px;");
@@ -28,10 +39,10 @@ public class TicketView {
                         "-fx-font-weight: bold;"
         );
 
-        Label hint = new Label("Пожалуйста, ожидайте своей очереди");
-        hint.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
+        hintLabel = new Label();
+        hintLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
 
-        VBox card = new VBox(10, title, userLabel, codeLabel, hint);
+        VBox card = new VBox(10, titleLabel, userLabel, codeLabel, hintLabel);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(24));
         card.setMaxWidth(400);
@@ -47,7 +58,7 @@ public class TicketView {
         center.setPadding(new Insets(24));
         center.setAlignment(Pos.CENTER);
 
-        doneButton = new Button("Готово");
+        doneButton = new Button();
         doneButton.setStyle(UiStyles.SECONDARY_BUTTON);
         doneButton.setPrefSize(200, 40);
 
@@ -56,9 +67,15 @@ public class TicketView {
         bottom.setAlignment(Pos.CENTER);
 
         root = new BorderPane();
+        root.setTop(HeaderBar.create(onLanguageChange));
         root.setCenter(center);
         root.setBottom(bottom);
         root.setStyle(UiStyles.DARK_BG);
+
+        doneButton.prefWidthProperty().bind(root.widthProperty().multiply(DONE_WIDTH_RATIO));
+        doneButton.prefHeightProperty().bind(root.heightProperty().multiply(DONE_HEIGHT_RATIO));
+
+        applyLanguage(initialLanguage);
     }
 
     public Parent getRoot() {
@@ -76,5 +93,11 @@ public class TicketView {
         } else {
             userLabel.setText(displayRole);
         }
+    }
+
+    public void applyLanguage(Language lang) {
+        titleLabel.setText(I18n.ticketTitle(lang));
+        hintLabel.setText(I18n.ticketHint(lang));
+        doneButton.setText(I18n.buttonDone(lang));
     }
 }

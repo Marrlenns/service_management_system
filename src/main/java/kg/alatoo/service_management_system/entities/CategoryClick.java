@@ -15,12 +15,13 @@ public class CategoryClick {
      * Общий идентификатор пользователя:
      * - для студента: id студента
      * - для преподавателя: id преподавателя
+     * - для родителей/других: null (user_id = null)
      */
     @Column(name = "user_id")
     private Long userId;
 
     /**
-     * Роль пользователя: "STUDENT" или "TEACHER"
+     * Роль пользователя: "STUDENT" / "TEACHER" / "OTHER"
      */
     @Column(name = "role")
     private String role;
@@ -32,11 +33,17 @@ public class CategoryClick {
     private Integer categoryIndex;
 
     /**
-     * Сохранённый код, который показывали на талоне:
-     * "A1", "Б2", "В10" и т.п.
+     * Сохранённый код талона: "A1", "Б2", "В10" и т.п.
      */
     @Column(name = "code")
     private String code;
+
+    /**
+     * Статус талона: WAITING / IN_PROGRESS / DONE
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private CategoryStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -48,11 +55,13 @@ public class CategoryClick {
                          String role,
                          Integer categoryIndex,
                          String code,
+                         CategoryStatus status,
                          LocalDateTime createdAt) {
         this.userId = userId;
         this.role = role;
         this.categoryIndex = categoryIndex;
         this.code = code;
+        this.status = status;
         this.createdAt = createdAt;
     }
 
@@ -90,6 +99,14 @@ public class CategoryClick {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public CategoryStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CategoryStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

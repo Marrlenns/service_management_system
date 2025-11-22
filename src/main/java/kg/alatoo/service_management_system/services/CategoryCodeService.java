@@ -1,6 +1,7 @@
 package kg.alatoo.service_management_system.services;
 
 import kg.alatoo.service_management_system.entities.CategoryClick;
+import kg.alatoo.service_management_system.entities.CategoryStatus;
 import kg.alatoo.service_management_system.repositories.CategoryClickRepository;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class CategoryCodeService {
         click.setRole(role);
         click.setCategoryIndex(categoryIndex);
         click.setCode(code);
+        click.setStatus(CategoryStatus.WAITING);
         click.setCreatedAt(LocalDateTime.now());
 
         repository.save(click);

@@ -18,47 +18,68 @@ public class TicketView {
     private final Label userLabel;
     private final Label codeLabel;
     private final Label hintLabel;
+    private final Label photoHintLabel;
     private final Button doneButton;
 
-    private static final double DONE_WIDTH_RATIO  = 0.2;
-    private static final double DONE_HEIGHT_RATIO = 0.06;
+    // чуть шире и выше кнопку, чтобы по стилю подходила к большим текстам
+    private static final double DONE_WIDTH_RATIO  = 0.25;
+    private static final double DONE_HEIGHT_RATIO = 0.08;
 
     public TicketView(Language initialLanguage,
                       Consumer<Language> onLanguageChange) {
 
+        // 🔹 Заголовок ("Ваш номер") — ОЧЕНЬ крупный
         titleLabel = new Label();
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;");
-
-        userLabel = new Label();
-        userLabel.setStyle("-fx-text-fill: #CFD8DC; -fx-font-size: 16px;");
-
-        codeLabel = new Label();
-        codeLabel.setStyle(
-                "-fx-text-fill: #FFEB3B;" +
-                        "-fx-font-size: 80px;" +
+        titleLabel.setStyle(
+                "-fx-text-fill: white;" +
+                        "-fx-font-size: 48px;" +          // было 36 → теперь ещё больше
                         "-fx-font-weight: bold;"
         );
 
+        // 🔹 Роль + имя ("Студент: Имя")
+        userLabel = new Label();
+        userLabel.setStyle(
+                "-fx-text-fill: #CFD8DC;" +
+                        "-fx-font-size: 32px;"            // было 24 → увеличили
+        );
+
+        // 🔹 Сам номер талона — максимально жирный и огромный
+        codeLabel = new Label();
+        codeLabel.setStyle(
+                "-fx-text-fill: #FFEB3B;" +
+                        "-fx-font-size: 180px;" +         // было 120 → теперь реально огромный
+                        "-fx-font-weight: bold;"
+        );
+
+        // 🔹 Основная подсказка ("Пожалуйста, ожидайте своей очереди")
         hintLabel = new Label();
-        hintLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
+        hintLabel.setStyle(
+                "-fx-text-fill: white;" +
+                        "-fx-font-size: 32px;"            // было 24 → больше
+        );
 
-        VBox cardContent = new VBox(10, titleLabel, userLabel, codeLabel, hintLabel);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setPadding(new Insets(24));
+        // 🔹 Тонкий текст про фото талона
+        photoHintLabel = new Label();
+        photoHintLabel.setStyle(
+                "-fx-text-fill: #B0BEC5;" +
+                        "-fx-font-size: 26px;"            // было 20 → тоже заметнее
+        );
+        photoHintLabel.setWrapText(true);
+        photoHintLabel.setMaxWidth(900);
 
-        StackPane card = new StackPane(cardContent);
-        card.setStyle(UiStyles.CARD);
-        card.setMaxWidth(420);
+        VBox content = new VBox(20, titleLabel, userLabel, codeLabel, hintLabel, photoHintLabel);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(50));
 
-        StackPane center = new StackPane(card);
-        center.setPadding(new Insets(32));
+        StackPane center = new StackPane(content);
+        center.setPadding(new Insets(40));
         center.setAlignment(Pos.CENTER);
 
         doneButton = new Button();
         doneButton.setStyle(UiStyles.SECONDARY_BUTTON);
 
         StackPane bottom = new StackPane(doneButton);
-        bottom.setPadding(new Insets(20));
+        bottom.setPadding(new Insets(30));
         bottom.setAlignment(Pos.CENTER);
 
         root = new BorderPane();
@@ -93,6 +114,7 @@ public class TicketView {
     public void applyLanguage(Language lang) {
         titleLabel.setText(I18n.ticketTitle(lang));
         hintLabel.setText(I18n.ticketHint(lang));
+        photoHintLabel.setText(I18n.ticketPhotoHint(lang));
         doneButton.setText(I18n.buttonDone(lang));
     }
 }

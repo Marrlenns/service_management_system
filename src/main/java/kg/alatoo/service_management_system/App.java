@@ -34,12 +34,16 @@ public class App extends Application {
     // текущий язык
     private Language currentLanguage = Language.RU;
 
+    // номер выбранной категории (1..5), пока мы на экране описания
+    private int currentCategoryIndex = 1;
+
     // Вьюшки
-    private MainMenuView     mainMenuView;
-    private StudentLoginView studentLoginView;
-    private TeacherLoginView teacherLoginView;
-    private WelcomeView      welcomeView;
-    private TicketView       ticketView;
+    private MainMenuView        mainMenuView;
+    private StudentLoginView    studentLoginView;
+    private TeacherLoginView    teacherLoginView;
+    private WelcomeView         welcomeView;
+    private CategoryDetailsView categoryDetailsView;
+    private TicketView          ticketView;
 
     @Override
     public void init() {
@@ -51,17 +55,18 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         // ---- Бины ----
-        StudentService            studentService      = context.getBean(StudentService.class);
-        TeacherService            teacherService      = context.getBean(TeacherService.class);
-        CategoryCodeService       categoryCodeService = context.getBean(CategoryCodeService.class);
-        TelegramNotificationService telegramService   = context.getBean(TelegramNotificationService.class);
+        StudentService              studentService      = context.getBean(StudentService.class);
+        TeacherService              teacherService      = context.getBean(TeacherService.class);
+        CategoryCodeService         categoryCodeService = context.getBean(CategoryCodeService.class);
+        TelegramNotificationService telegramService     = context.getBean(TelegramNotificationService.class);
 
-        // ---- Вьюшки (с языком и колбэком смены языка) ----
-        mainMenuView     = new MainMenuView(currentLanguage, this::onLanguageChange);
-        studentLoginView = new StudentLoginView(currentLanguage, this::onLanguageChange);
-        teacherLoginView = new TeacherLoginView(currentLanguage, this::onLanguageChange);
-        welcomeView      = new WelcomeView(currentLanguage, this::onLanguageChange);
-        ticketView       = new TicketView(currentLanguage, this::onLanguageChange);
+        // ---- Вьюшки ----
+        mainMenuView        = new MainMenuView(currentLanguage, this::onLanguageChange);
+        studentLoginView    = new StudentLoginView(currentLanguage, this::onLanguageChange);
+        teacherLoginView    = new TeacherLoginView(currentLanguage, this::onLanguageChange);
+        welcomeView         = new WelcomeView(currentLanguage, this::onLanguageChange);
+        categoryDetailsView = new CategoryDetailsView(currentLanguage, this::onLanguageChange);
+        ticketView          = new TicketView(currentLanguage, this::onLanguageChange);
 
         // Иконка окна
         try {
@@ -162,8 +167,10 @@ public class App extends Application {
                     currentUserRole = "STUDENT";
                     updateWelcomeLabel();
                     scene.setRoot(welcomeView.getRoot());
-                }, () -> showAlert(Alert.AlertType.INFORMATION,
-                        I18n.alertStudentNotFound(currentLanguage)));
+                }, () -> showAlert(
+                        Alert.AlertType.INFORMATION,
+                        I18n.alertStudentNotFound(currentLanguage)
+                ));
             });
 
             task.setOnFailed(ev -> {
@@ -202,8 +209,10 @@ public class App extends Application {
                     currentUserRole = "TEACHER";
                     updateWelcomeLabel();
                     scene.setRoot(welcomeView.getRoot());
-                }, () -> showAlert(Alert.AlertType.INFORMATION,
-                        I18n.alertTeacherNotFound(currentLanguage)));
+                }, () -> showAlert(
+                        Alert.AlertType.INFORMATION,
+                        I18n.alertTeacherNotFound(currentLanguage)
+                ));
             });
 
             task.setOnFailed(ev -> {
@@ -217,7 +226,7 @@ public class App extends Application {
             new Thread(task, "db-teacher-lookup").start();
         });
 
-        // ===== Обработчики категорий =====
+        // ===== Обработчики категорий на экране приветствия =====
         var categoryButtons = welcomeView.getCategoryButtons();
         for (int i = 0; i < categoryButtons.length; i++) {
             final int catIndex = i + 1;
@@ -228,60 +237,92 @@ public class App extends Application {
                     return;
                 }
 
-                var sourceButton = categoryButtons[catIndex - 1];
-                sourceButton.setDisable(true);
-
-                Task<String> task = new Task<>() {
-                    @Override
-                    protected String call() {
-                        return categoryCodeService.registerClickAndGetCode(
-                                currentUserId,
-                                currentUserRole,
-                                catIndex
-                        );
-                    }
-                };
-
-                task.setOnSucceeded(ev -> {
-                    sourceButton.setDisable(false);
-                    String code = task.getValue();
-
-                    String displayRole;
-                    if ("TEACHER".equals(currentUserRole)) {
-                        displayRole = I18n.roleTeacher(currentLanguage);
-                    } else if ("STUDENT".equals(currentUserRole)) {
-                        displayRole = I18n.roleStudent(currentLanguage);
-                    } else if ("OTHER".equals(currentUserRole)) {
-                        displayRole = I18n.roleOther(currentLanguage);
-                    } else {
-                        displayRole = currentUserRole;
-                    }
-
-                    // Показываем талон на экране
-                    ticketView.showTicket(displayRole, currentUserName, code);
-                    scene.setRoot(ticketView.getRoot());
-
-                    // Отправляем талон в Telegram — только для студентов, если привязка есть
-                    if ("STUDENT".equals(currentUserRole) && currentUserId != null) {
-                        try {
-                            telegramService.sendTicketToStudent(currentUserId, code, catIndex);
-                        } catch (Exception ex) {
-                            System.err.println("[App] Ошибка отправки талона в Telegram: " + ex.getMessage());
-                        }
-                    }
-                });
-
-                task.setOnFailed(ev -> {
-                    sourceButton.setDisable(false);
-                    Throwable ex = task.getException();
-                    showAlert(Alert.AlertType.ERROR,
-                            I18n.alertCategoryErrorPrefix(currentLanguage) +
-                                    (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown"));
-                });
-
-                new Thread(task, "db-category-click").start();
+                // запоминаем выбранную категорию
+                currentCategoryIndex = catIndex;
+                // подставляем её в экран деталей
+                categoryDetailsView.setCategoryIndex(catIndex, currentLanguage);
+                // показываем экран деталей
+                scene.setRoot(categoryDetailsView.getRoot());
             });
         }
+
+        // ===== Кнопка "Отмена" на экране деталей категории =====
+        categoryDetailsView.getCancelButton().setOnAction(e -> {
+            // возвращаемся на список категорий
+            scene.setRoot(welcomeView.getRoot());
+        });
+
+        // ===== Кнопка "Продолжить" на экране деталей категории =====
+        categoryDetailsView.getContinueButton().setOnAction(e -> {
+            if (currentUserRole == null) {
+                showAlert(Alert.AlertType.WARNING,
+                        I18n.alertLoginOrOtherFirst(currentLanguage));
+                // на всякий случай возвращаем на главное меню
+                scene.setRoot(mainMenuView.getRoot());
+                return;
+            }
+
+            final int catIndex = currentCategoryIndex;
+
+            var btnContinue = categoryDetailsView.getContinueButton();
+            var btnCancel   = categoryDetailsView.getCancelButton();
+            btnContinue.setDisable(true);
+            btnCancel.setDisable(true);
+
+            Task<String> task = new Task<>() {
+                @Override
+                protected String call() {
+                    return categoryCodeService.registerClickAndGetCode(
+                            currentUserId,
+                            currentUserRole,
+                            catIndex
+                    );
+                }
+            };
+
+            task.setOnSucceeded(ev -> {
+                btnContinue.setDisable(false);
+                btnCancel.setDisable(false);
+
+                String code = task.getValue();
+
+                String displayRole;
+                if ("TEACHER".equals(currentUserRole)) {
+                    displayRole = I18n.roleTeacher(currentLanguage);
+                } else if ("STUDENT".equals(currentUserRole)) {
+                    displayRole = I18n.roleStudent(currentLanguage);
+                } else if ("OTHER".equals(currentUserRole)) {
+                    displayRole = I18n.roleOther(currentLanguage);
+                } else {
+                    displayRole = currentUserRole;
+                }
+
+                // показываем талон
+                ticketView.showTicket(displayRole, currentUserName, code);
+                scene.setRoot(ticketView.getRoot());
+
+                // отправляем талон в Telegram — только студенту
+                if ("STUDENT".equals(currentUserRole) && currentUserId != null) {
+                    try {
+                        telegramService.sendTicketToStudent(currentUserId, code, catIndex);
+                    } catch (Exception ex) {
+                        System.err.println("[App] Ошибка отправки талона в Telegram: " + ex.getMessage());
+                    }
+                }
+            });
+
+            task.setOnFailed(ev -> {
+                btnContinue.setDisable(false);
+                btnCancel.setDisable(false);
+
+                Throwable ex = task.getException();
+                showAlert(Alert.AlertType.ERROR,
+                        I18n.alertCategoryErrorPrefix(currentLanguage) +
+                                (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown"));
+            });
+
+            new Thread(task, "db-category-click").start();
+        });
     }
 
     private void clearCurrentUser() {
@@ -311,6 +352,7 @@ public class App extends Application {
         studentLoginView.applyLanguage(lang);
         teacherLoginView.applyLanguage(lang);
         welcomeView.applyLanguage(lang);
+        categoryDetailsView.applyLanguage(lang);
         ticketView.applyLanguage(lang);
 
         updateWelcomeLabel();

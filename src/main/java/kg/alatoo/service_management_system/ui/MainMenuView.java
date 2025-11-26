@@ -34,16 +34,9 @@ public class MainMenuView {
 
         VBox menu = new VBox(18, studentButton, teacherButton, otherButton);
         menu.setAlignment(Pos.CENTER);
+        menu.setPadding(new Insets(24));
 
-        VBox cardContent = new VBox(24, menu);
-        cardContent.setAlignment(Pos.CENTER);
-        cardContent.setPadding(new Insets(24));
-
-        StackPane card = new StackPane(cardContent);
-        card.setStyle(UiStyles.CARD);
-        card.setMaxWidth(500);
-
-        StackPane center = new StackPane(card);
+        StackPane center = new StackPane(menu);
         center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 

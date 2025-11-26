@@ -34,12 +34,19 @@ public class StudentLoginView {
 
         idField = new TextField();
         idField.setEditable(false);
-        idField.setPrefColumnCount(12);
-        idField.setMaxWidth(260);
-        idField.setStyle("-fx-font-size: 16px;");
+
+        // 🔹 Делаем строку ввода больше
+        idField.setPrefColumnCount(16);                 // больше символов по ширине
+        idField.setMaxWidth(360);                       // шире визуально
+        idField.setPrefHeight(50);                      // выше поле
+        idField.setStyle(
+                "-fx-font-size: 20px;" +                // крупнее шрифт
+                        "-fx-padding: 10 16;"                   // внутренние отступы
+        );
 
         NumberKeyboard keypad = NumberKeyboard.forTextField(idField, 12);
-        keypad.setKeyWidth(72);
+        // Если хочешь ещё больше кнопки — можешь поиграть тут:
+        // keypad.setKeySize(90, 64);
         keypad.setMaxWidth(Region.USE_PREF_SIZE);
 
         HBox keypadBox = new HBox(keypad);
@@ -53,13 +60,9 @@ public class StudentLoginView {
 
         VBox content = new VBox(18, titleLabel, idField, keypadBox, enterButton);
         content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(32));
 
-        StackPane card = new StackPane(content);
-        card.setStyle(UiStyles.CARD);
-        card.setPadding(new Insets(32));
-        card.setMaxWidth(520);
-
-        StackPane center = new StackPane(card);
+        StackPane center = new StackPane(content);
         center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 

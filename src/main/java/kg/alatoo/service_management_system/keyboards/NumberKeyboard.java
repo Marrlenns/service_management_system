@@ -11,24 +11,25 @@ public class NumberKeyboard extends GridPane {
     private final String digitStyle =
             "-fx-background-color: #1976D2;" +
                     "-fx-text-fill: white;" +
-                    "-fx-font-size: 16px;" +
+                    "-fx-font-size: 18px;" +          // было 16px → стало чуть больше
                     "-fx-font-weight: bold;" +
                     "-fx-background-radius: 8px;" +
-                    "-fx-padding: 8px 0;";
+                    "-fx-padding: 12px 0;";           // было 8px → стало 12px
 
     private final String utilStyle =
             "-fx-background-color: #455A64;" +
                     "-fx-text-fill: white;" +
-                    "-fx-font-size: 16px;" +
+                    "-fx-font-size: 18px;" +          // тоже увеличили
                     "-fx-font-weight: bold;" +
                     "-fx-background-radius: 8px;" +
-                    "-fx-padding: 8px 0;";
+                    "-fx-padding: 12px 0;";
 
-    private double keyWidth = 64;
+    private double keyWidth  = 80;            // было 64 → сделали шире
+    private double keyHeight = 56;            // добавили высоту
 
     public NumberKeyboard(Consumer<String> onDigit, Runnable onBackspace, Runnable onClear) {
-        setHgap(8);
-        setVgap(8);
+        setHgap(10);
+        setVgap(10);
         setAlignment(Pos.CENTER);
 
         int n = 1;
@@ -65,6 +66,9 @@ public class NumberKeyboard extends GridPane {
         return new NumberKeyboard(onDigit, onBackspace, onClear);
     }
 
+    /**
+     * Оставляем твой старый метод, но теперь он ещё и высоту обновляет.
+     */
     public void setKeyWidth(double w) {
         this.keyWidth = w;
         getChildren().stream()
@@ -74,6 +78,28 @@ public class NumberKeyboard extends GridPane {
                     b.setPrefWidth(w);
                     b.setMinWidth(w);
                     b.setMaxWidth(w);
+                    b.setPrefHeight(keyHeight);
+                    b.setMinHeight(keyHeight);
+                    b.setMaxHeight(keyHeight);
+                });
+    }
+
+    /**
+     * Если захочешь ещё поиграться с размерами — можно вызывать setKeySize(w, h).
+     */
+    public void setKeySize(double w, double h) {
+        this.keyWidth = w;
+        this.keyHeight = h;
+        getChildren().stream()
+                .filter(n -> n instanceof Button)
+                .map(n -> (Button) n)
+                .forEach(b -> {
+                    b.setPrefWidth(w);
+                    b.setMinWidth(w);
+                    b.setMaxWidth(w);
+                    b.setPrefHeight(h);
+                    b.setMinHeight(h);
+                    b.setMaxHeight(h);
                 });
     }
 
@@ -83,6 +109,9 @@ public class NumberKeyboard extends GridPane {
         b.setPrefWidth(keyWidth);
         b.setMinWidth(keyWidth);
         b.setMaxWidth(keyWidth);
+        b.setPrefHeight(keyHeight);
+        b.setMinHeight(keyHeight);
+        b.setMaxHeight(keyHeight);
         b.setOnAction(e -> onDigit.accept(txt));
         return b;
     }
@@ -93,6 +122,9 @@ public class NumberKeyboard extends GridPane {
         b.setPrefWidth(keyWidth);
         b.setMinWidth(keyWidth);
         b.setMaxWidth(keyWidth);
+        b.setPrefHeight(keyHeight);
+        b.setMinHeight(keyHeight);
+        b.setMaxHeight(keyHeight);
         b.setOnAction(e -> action.run());
         return b;
     }

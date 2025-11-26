@@ -15,19 +15,33 @@ public class WelcomeView {
 
     private final BorderPane root;
     private final Label welcomeLabel;
+    private final Label hintLabel;          // 🔹 новая подсказка
     private final Button[] categoryButtons;
     private final Button backButton;
 
-    private static final double CAT_WIDTH_RATIO  = 0.35;
-    private static final double CAT_HEIGHT_RATIO = 0.08;
-    private static final double BACK_WIDTH_RATIO = 0.2;
+    private static final double CAT_WIDTH_RATIO   = 0.35;
+    private static final double CAT_HEIGHT_RATIO  = 0.08;
+    private static final double BACK_WIDTH_RATIO  = 0.20;
     private static final double BACK_HEIGHT_RATIO = 0.06;
 
     public WelcomeView(Language initialLanguage,
                        Consumer<Language> onLanguageChange) {
 
         welcomeLabel = new Label();
-        welcomeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;");
+        welcomeLabel.setStyle(
+                "-fx-text-fill: white;" +
+                        "-fx-font-size: 30px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        // 🔹 текст-подсказка под приветствием
+        hintLabel = new Label();
+        hintLabel.setStyle(
+                "-fx-text-fill: #CFD8DC;" +
+                        "-fx-font-size: 18px;"
+        );
+        hintLabel.setWrapText(true);
+        hintLabel.setMaxWidth(800);
 
         categoryButtons = new Button[5];
         for (int i = 0; i < 5; i++) {
@@ -42,21 +56,19 @@ public class WelcomeView {
                 categoryButtons[1],
                 categoryButtons[2],
                 categoryButtons[3],
-                categoryButtons[4]);
+                categoryButtons[4]
+        );
         categoriesCol.setAlignment(Pos.CENTER);
 
         backButton = new Button();
         backButton.setStyle(UiStyles.SECONDARY_BUTTON);
 
-        VBox content = new VBox(24, welcomeLabel, categoriesCol);
+        // 🔹 теперь: приветствие + подсказка + кнопки категорий
+        VBox content = new VBox(16, welcomeLabel, hintLabel, categoriesCol);
         content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(32));
 
-        StackPane card = new StackPane(content);
-        card.setStyle(UiStyles.CARD);
-        card.setPadding(new Insets(32));
-        card.setMaxWidth(560);
-
-        StackPane center = new StackPane(card);
+        StackPane center = new StackPane(content);
         center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 
@@ -70,7 +82,7 @@ public class WelcomeView {
         root.setBottom(bottom);
         root.setStyle(UiStyles.DARK_BG);
 
-        // биндим размеры кнопок
+        // Биндим размеры кнопок к размеру окна
         for (Button b : categoryButtons) {
             b.prefWidthProperty().bind(root.widthProperty().multiply(CAT_WIDTH_RATIO));
             b.prefHeightProperty().bind(root.heightProperty().multiply(CAT_HEIGHT_RATIO));
@@ -102,6 +114,7 @@ public class WelcomeView {
         for (int i = 0; i < categoryButtons.length; i++) {
             categoryButtons[i].setText(I18n.categoryLabel(lang, i + 1));
         }
+        hintLabel.setText(I18n.categorySelectHint(lang));   // 🔹 используем новый текст
         backButton.setText(I18n.buttonBack(lang));
     }
 }

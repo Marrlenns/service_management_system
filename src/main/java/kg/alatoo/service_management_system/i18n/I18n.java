@@ -117,11 +117,7 @@ public final class I18n {
     }
 
     public static String categoryLabel(Language lang, int index) {
-        String num = String.valueOf(index);
-        return switch (lang) {
-            case EN -> "Category " + num;
-            default -> "Категория " + num;
-        };
+        return categoryTitle(lang, index);
     }
 
     public static String roleStudent(Language lang) {
@@ -210,4 +206,201 @@ public final class I18n {
             default -> "Ошибка при выдаче кода категории:\n";
         };
     }
+
+    public static String categoryTitle(Language lang, int index) {
+        return switch (lang) {
+            case EN -> switch (index) {
+                case 1 -> "Documents";
+                case 2 -> "Academic life";
+                case 3 -> "AIU System";
+                case 4 -> "Finance";
+                case 5 -> "Student Life";
+                default -> "Category " + index;
+            };
+            case RU -> switch (index) {
+                case 1 -> "Документы";
+                case 2 -> "Академическая жизнь";
+                case 3 -> "Система AIU";
+                case 4 -> "Финансы";
+                case 5 -> "Студенческая жизнь";
+                default -> "Категория " + index;
+            };
+            case KY -> switch (index) {
+                case 1 -> "Документтер";
+                case 2 -> "Академиялык жашоо";
+                case 3 -> "AIU системасы";
+                case 4 -> "Каржы";
+                case 5 -> "Студенттик жашоо";
+                default -> "Категория " + index;
+            };
+        };
+    }
+
+    public static String categoryDescription(Language lang, int index) {
+        return switch (lang) {
+            case EN -> switch (index) {
+                case 1 -> """
+                    Includes:
+                    • ID cards
+                    • study certificates
+                    • transcripts
+                    • applications (withdrawal, academic leave, etc.)
+                    • military certificate requests
+                    • diploma–related requests
+                    """;
+                case 2 -> """
+                    Includes:
+                    • withdrawal
+                    • readmission
+                    • internal and external transfer
+                    • change of faculty or major
+                    • academic performance (grades, schedule, retakes)
+                    • credit compatibility
+                    """;
+                case 3 -> """
+                    Includes:
+                    • MyAlatoo platform issues
+                    • corporate email access
+                    • Wi-Fi problems
+                    • website errors
+                    • registration and login problems
+                    """;
+                case 4 -> """
+                    Includes:
+                    • contract payments
+                    • invoices and receipts
+                    • scholarship status
+                    • financial clearance
+                    """;
+                case 5 -> """
+                    Includes:
+                    • events and student clubs
+                    • participation requests
+                    • campus activities
+                    • announcements and engagement
+                    """;
+                default -> "";
+            };
+            case RU -> switch (index) {
+                case 1 -> """
+                    Включает:
+                    • студенческие ID-карты
+                    • справки с места учёбы
+                    • транскрипты
+                    • заявления (отчисление, академ. отпуск и т.п.)
+                    • запросы военный билет / справка
+                    • запросы, связанные с дипломом
+                    """;
+                case 2 -> """
+                    Включает:
+                    • отчисление
+                    • восстановление
+                    • внутренний и внешний перевод
+                    • смену факультета или специальности
+                    • академическую успеваемость (оценки, расписание, пересдачи)
+                    • совместимость кредитов
+                    """;
+                case 3 -> """
+                    Включает:
+                    • проблемы с платформой MyAlatoo
+                    • доступ к корпоративной почте
+                    • проблемы с Wi-Fi
+                    • ошибки на сайте
+                    • проблемы с регистрацией и входом в систему
+                    """;
+                case 4 -> """
+                    Включает:
+                    • оплату по контракту
+                    • счета и квитанции
+                    • статус стипендии
+                    • финансовый клиренс
+                    """;
+                case 5 -> """
+                    Включает:
+                    • мероприятия и студенческие клубы
+                    • заявки на участие
+                    • активность на кампусе
+                    • объявления и вовлечённость студентов
+                    """;
+                default -> "";
+            };
+            case KY -> switch (index) {
+                case 1 -> """
+                    Камтыйт:
+                    • студенттик ID карталар
+                    • окуу жайдан маалымкаттар
+                    • транскрипттер
+                    • арыздар (чыгаруу, академиялык өргүү ж.б.)
+                    • аскердик билет боюнча өтүнүчтөр
+                    • дипломго байланышкан суроолор
+                    """;
+                case 2 -> """
+                    Камтыйт:
+                    • чыгаруу
+                    • калыбына келтирүү
+                    • ички жана тышкы которуу
+                    • факультет же адистикти алмаштыруу
+                    • академиялык жетишкендик (баалар, расписание, кайра тапшыруу)
+                    • кредиттердин шайкештиги
+                    """;
+                case 3 -> """
+                    Камтыйт:
+                    • MyAlatoo платформасына байланышкан көйгөйлөр
+                    • корпоративдик почтага кирүү
+                    • Wi-Fi көйгөйлөрү
+                    • сайттагы каталар
+                    • катталуу жана кирүү маселелери
+                    """;
+                case 4 -> """
+                    Камтыйт:
+                    • контракттык төлөмдөр
+                    • эсеп-фактуралар жана квитанциялар
+                    • стипендиянын статусу
+                    • финансылык клиренс
+                    """;
+                case 5 -> """
+                    Камтыйт:
+                    • иш-чаралар жана студенттик клубдар
+                    • катышуу өтүнүчтөрү
+                    • кампустагы активдүүлүк
+                    • билдирүүлөр жана студенттик катышуу
+                    """;
+                default -> "";
+            };
+        };
+    }
+
+    public static String buttonContinue(Language lang) {
+        return switch (lang) {
+            case EN -> "Continue";
+            case RU -> "Продолжить";
+            case KY -> "Улантуу";
+        };
+    }
+
+    public static String buttonCancel(Language lang) {
+        return switch (lang) {
+            case EN -> "Cancel";
+            case RU -> "Отмена";
+            case KY -> "Бекитпөө";
+        };
+    }
+
+    public static String ticketPhotoHint(Language lang) {
+        return switch (lang) {
+            case KY -> "Эгерде сиз биздин Telegram-ботко катталбасаңыз, талондун номерин унутуп калбаш үчүн сүрөткө тартып коюңуз.";
+            case EN -> "If you are not subscribed to our Telegram bot, we recommend taking a photo of your ticket number so you don’t forget it.";
+            default -> "Если вы не подписаны на нашего Telegram-бота, рекомендуем сфотографировать номер талона, чтобы не забыть его.";
+        };
+    }
+
+    public static String categorySelectHint(Language lang) {
+        return switch (lang) {
+            case EN -> "Please choose the category that best matches your question.";
+            case KY -> "Сураныч, сурооңузга эң туура келген категорияны тандаңыз.";
+            default -> "Пожалуйста, выберите категорию, которая лучше всего подходит к вашему вопросу.";
+        };
+    }
+
+
 }

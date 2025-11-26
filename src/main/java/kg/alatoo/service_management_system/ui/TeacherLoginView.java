@@ -53,13 +53,9 @@ public class TeacherLoginView {
 
         VBox content = new VBox(18, titleLabel, emailField, keyboardBox, enterButton);
         content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(32));
 
-        StackPane card = new StackPane(content);
-        card.setStyle(UiStyles.CARD);
-        card.setPadding(new Insets(32));
-        card.setMaxWidth(560);
-
-        StackPane center = new StackPane(card);
+        StackPane center = new StackPane(content);
         center.setPadding(new Insets(32));
         center.setAlignment(Pos.CENTER);
 

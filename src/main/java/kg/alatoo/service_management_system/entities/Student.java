@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "students")
 public class Student {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String firstname;
@@ -16,9 +17,15 @@ public class Student {
     @Column(name = "department")
     private String department;
 
+    @Column(name = "telegram_chat_id")
+    private Long telegramChatId;
+
     public Student() { }
 
-    public Student(String firstname, String lastname, String faculty, String department) {
+    public Student(String firstname,
+                   String lastname,
+                   String faculty,
+                   String department) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.faculty = faculty;
@@ -34,4 +41,6 @@ public class Student {
     public void setFaculty(String faculty) { this.faculty = faculty; }
     public String getDepartment() { return department; }
     public void setDepartment(String department) { this.department = department; }
+    public Long getTelegramChatId() {return telegramChatId;}
+    public void setTelegramChatId(Long telegramChatId) {this.telegramChatId = telegramChatId;}
 }

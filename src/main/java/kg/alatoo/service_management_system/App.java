@@ -12,12 +12,12 @@ import kg.alatoo.service_management_system.i18n.Language;
 import kg.alatoo.service_management_system.services.CategoryCodeService;
 import kg.alatoo.service_management_system.services.StudentService;
 import kg.alatoo.service_management_system.services.TeacherService;
+import kg.alatoo.service_management_system.services.TelegramNotificationService;
 import kg.alatoo.service_management_system.ui.*;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -51,9 +51,10 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         // ---- Бины ----
-        StudentService      studentService      = context.getBean(StudentService.class);
-        TeacherService      teacherService      = context.getBean(TeacherService.class);
-        CategoryCodeService categoryCodeService = context.getBean(CategoryCodeService.class);
+        StudentService            studentService      = context.getBean(StudentService.class);
+        TeacherService            teacherService      = context.getBean(TeacherService.class);
+        CategoryCodeService       categoryCodeService = context.getBean(CategoryCodeService.class);
+        TelegramNotificationService telegramService   = context.getBean(TelegramNotificationService.class);
 
         // ---- Вьюшки (с языком и колбэком смены языка) ----
         mainMenuView     = new MainMenuView(currentLanguage, this::onLanguageChange);
@@ -62,6 +63,7 @@ public class App extends Application {
         welcomeView      = new WelcomeView(currentLanguage, this::onLanguageChange);
         ticketView       = new TicketView(currentLanguage, this::onLanguageChange);
 
+        // Иконка окна
         try {
             var is = getClass().getResourceAsStream("/logo.png");
             if (is != null) {
@@ -255,8 +257,18 @@ public class App extends Application {
                         displayRole = currentUserRole;
                     }
 
+                    // Показываем талон на экране
                     ticketView.showTicket(displayRole, currentUserName, code);
                     scene.setRoot(ticketView.getRoot());
+
+                    // Отправляем талон в Telegram — только для студентов, если привязка есть
+                    if ("STUDENT".equals(currentUserRole) && currentUserId != null) {
+                        try {
+                            telegramService.sendTicketToStudent(currentUserId, code, catIndex);
+                        } catch (Exception ex) {
+                            System.err.println("[App] Ошибка отправки талона в Telegram: " + ex.getMessage());
+                        }
+                    }
                 });
 
                 task.setOnFailed(ev -> {
